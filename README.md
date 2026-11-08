@@ -1,21 +1,22 @@
 # my-mcp-server-storage
 
-Servidor MCP de memória persistente (SQLite), derivado do `my-local-storage-mcp`.
-Mesmas tools (`remember_fact`, `recall_facts`, `recall_by_topic`), mesma consolidação, mesmo sistema de plugins.
-O que mudou: fala **Streamable HTTP** em vez de stdio, exige **token** e guarda o banco em um **volume Docker**.
+Persistent-memory (SQLite) MCP server, derived from `my-local-storage-mcp`.
+Features the same tools (`remember_fact`, `recall_facts`, `recall_by_topic`), the same consolidation logic, and the same plugin system.
 
-## Subir
+Key changes: it uses **Streamable HTTP** instead of stdio, requires a **token**, and stores the database in a **Docker volume**.
+
+## How to use
 
 ```bash
 cp .env.example .env
-# edite .env e coloque um token: openssl rand -hex 32
+# edit .env e put a token: openssl rand -hex 32
 docker compose up -d --build
 curl http://localhost:2461/health      # {"status":"ok"}
 ```
 
-O banco fica no volume `mcp-storage-data` (`/data/storage.db` dentro do container).
-Para usar uma pasta do host em vez de volume nomeado, troque a linha do volume por `./data:/data`
-(use disco local; SQLite com WAL não combina com NFS/SMB).
+The database is located in the `mcp-storage-data` volume (`/data/storage.db` inside the container).
+To use a host directory instead of a named volume, replace the volume line with `./data:/data`
+(use a local disk; SQLite with WAL is not compatible with NFS/SMB).
 
 ## Backup
 
@@ -24,30 +25,30 @@ docker run --rm -v my-mcp-server-storage_mcp-storage-data:/data -v "$PWD":/backu
   tar czf /backup/storage-$(date +%F).tgz -C /data .
 ```
 
-(O nome do volume leva o prefixo da pasta do projeto; confira com `docker volume ls`.)
+(The volume name includes the project folder prefix; check it using `docker volume ls`.)
 
-## Variáveis de ambiente
+## Environment
 
-| Variável | Padrão | Descrição |
+| Variable | Default value | Description |
 |---|---|---|
-| `MCP_AUTH_TOKEN` | — (obrigatória) | Token Bearer. Sem ele o servidor não sobe. |
-| `MCP_PORT` | `2461` | Porta HTTP. |
-| `MCP_HOST` | `0.0.0.0` | Interface de escuta. |
-| `MCP_DB_PATH` | `/data/storage.db` | Caminho do SQLite. |
-| `MCP_ALLOWED_ORIGINS` | vazio | Origens de navegador permitidas (separadas por vírgula). |
-| `MCP_PRIMARY_*`, `MCP_FALLBACK_*` | — | Providers de IA para consolidação (como no projeto original). |
-| `MCP_PLUGINS` | — | Plugins a carregar (como no projeto original). |
+| `MCP_AUTH_TOKEN` | — (required) | Token Bearer. Without it, the server won't start up.. |
+| `MCP_PORT` | `2461` | HTTP Port. |
+| `MCP_HOST` | `0.0.0.0` | Listening interface. |
+| `MCP_DB_PATH` | `/data/storage.db` | SQLite path. |
+| `MCP_ALLOWED_ORIGINS` | vazio | Allowed browser origins (comma-separated). |
+| `MCP_PRIMARY_*`, `MCP_FALLBACK_*` | — | AI providers for consolidation (as in the original project). |
+| `MCP_PLUGINS` | — | Plugins to load (as in the original project). |
 
 ## Endpoints
 
-- `POST /mcp` — protocolo MCP (exige `Authorization: Bearer <token>`).
-- `GET /health` — healthcheck, sem autenticação.
+- `POST /mcp` — MCP protocol (require `Authorization: Bearer <token>`).
+- `GET /health` — healthcheck, with authentication.
 
-Modo stateless: sem sessões, uma instância de servidor por requisição, banco compartilhado.
+Stateless mode: no sessions, one server instance per request, shared database.
 
-## Configuração dos clientes
+## Client configuration
 
-Troque `192.168.0.10` pelo IP (fixo) da máquina que roda o Docker e exporte `MCP_TOKEN` com o mesmo valor do `.env`.
+Replace `192.168.0.10` with the (static) IP of the machine running Docker, and export `MCP_TOKEN` with the same value as in the `.env` file.
 
 **Claude Code**
 ```bash
@@ -85,17 +86,17 @@ bearer_token_env_var = "MCP_TOKEN"
   "env": { "MCP_TOKEN": "seu-token" } } } }
 ```
 
-## Rede: o que conferir se "não conecta"
+## Network: what to check if it "won't connect"
 
-1. `docker compose ps` mostra `healthy`?
-2. Da própria máquina: `curl http://localhost:2461/health`.
-3. De outra máquina: `curl http://IP:2461/health`. Se falhar só aqui, é firewall do host
-   (`ufw allow from 192.168.0.0/24 to any port 2461`) ou do Windows Defender.
-4. `401` = token errado. `403` = header `Origin` não permitido.
+1. Does `docker compose ps` show `healthy`?
+2. From the machine itself: `curl http://localhost:2461/health`.
+3. From another machine: `curl http://IP:2461/health`. If it only fails here, it’s likely a firewall issue on the host
+(use `ufw allow from 192.168.0.0/24 to any port 2461`) or Windows Defender.
+4. `401` = incorrect token. `403` = `Origin` header not allowed.
 
-## Migrar dados do my-local-storage-mcp
+## Migrating data from my-local-storage-mcp
 
-O esquema da tabela é o mesmo. Copie `~/.local_mcp_learning.db` para dentro do volume:
+The table schema is the same. Copy `~/.local_mcp_learning.db` into the volume:
 
 ```bash
 docker compose down
