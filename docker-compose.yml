@@ -1,0 +1,18 @@
+services:
+  storage:
+    build: .
+    image: my-mcp-server-storage:latest
+    container_name: my-mcp-server-storage
+    restart: unless-stopped
+    ports:
+      - "2461:2461"
+    environment:
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:?defina MCP_AUTH_TOKEN no arquivo .env}
+      # Opcional: consolidação semântica com IA local. Descomente para ligar
+      # (MCP_PRIMARY_MODEL e MCP_PRIMARY_PROVIDER também são aceitos).
+      # MCP_PRIMARY_HOST: http://192.168.0.20:11434
+    volumes:
+      - mcp-storage-data:/data
+
+volumes:
+  mcp-storage-data:

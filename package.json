@@ -1,0 +1,26 @@
+{
+  "name": "my-mcp-server-storage",
+  "version": "2.0.0",
+  "description": "Servidor MCP de memória persistente (SQLite) acessível pela rede local via HTTP, pensado para rodar em Docker.",
+  "type": "module",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "license": "ISC",
+  "author": "Andre Mesquita",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.4.0"
+  }
+}
