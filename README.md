@@ -1,6 +1,7 @@
 # my-mcp-server-storage
 
 Persistent-memory (SQLite) MCP server, derived from `my-local-storage-mcp`.
+
 Features the same tools (`remember_fact`, `recall_facts`, `recall_by_topic`), the same consolidation logic, and the same plugin system.
 
 Key changes: it uses **Streamable HTTP** instead of stdio, requires a **token**, and stores the database in a **Docker volume**.
