@@ -103,3 +103,13 @@ docker run --rm -v my-mcp-server-storage_mcp-storage-data:/data -v "$HOME":/src 
   cp /src/.local_mcp_learning.db /data/storage.db
 docker compose up -d
 ```
+<details>
+<summary><strong>Changelog</strong></summary>
+
+**v1.0.0** — my-local-storage-mcp v1.5.4 migrated
+
+</details>
+
+---
+
+ISC License — see [LICENSE](LICENSE).
